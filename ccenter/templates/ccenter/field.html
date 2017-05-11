@@ -1,0 +1,14 @@
+{% if form.instance.value_type == 'boolean_value' %}
+	{{ form.boolean_value.errors }}
+	{{ form.boolean_value }} <label for="{{ form.boolean_value.id_for_label }}">{{ form.instance.value_definition.label }}: </label>
+{% else %}
+    {% if form.instance.value_type == 'integer_value' %}
+   		{{ form.integer_value.errors }}
+   		<label for="{{ form.integer_value.id_for_label }}">{{ form.instance.value_definition.label }}: </label>
+       	{{ form.integer_value }}
+    {% else %}
+       	{{ form.char_value.errors }}
+       	<label for="{{ form.char_value.id_for_label }}">{{ form.instance.value_definition.label }}: </label>
+       	{{ form.char_value }}
+    {% endif %}
+{% endif %}

@@ -1,0 +1,42 @@
+{% load i18n admin_static %}
+
+
+<div>
+<form action="" method="post">
+{% csrf_token %}
+
+	<div class="inline-group" id="section-{ section.id }-group">
+			{% for formset in formset_list %}
+				{{ formset.management_form }}
+				{% for form in formset %}
+					{% for hidden in form.hidden_fields %}
+				        {{ hidden }}
+				    {% endfor %}    
+					<h2>Form {{ form.id.value }}</h2>
+					
+					{% if form.instance.value_type = 'boolean_value' %}
+						{{ form.boolean_value.errors }}
+                        {{ form.boolean_value }} <label for="{{ form.boolean_value.id_for_label }}"> ent.title</label>
+                    {% else %}
+                        
+                
+                        	{% if form.instance.value_type = 'integer_value' %}
+                        		{{ form.integer_value.errors }}
+                        		<label for="{{ form.integer_value.id_for_label }}">integer: </label>
+                            	{{ form.integer_value }}
+                            {% else %}
+                            	{{ form.char_value.errors }}
+                            	<label for="{{ form.char_value.id_for_label }}">char: </label>
+                            	{{ form.char_value }}
+                            {% endif %}
+                    {% endif %}
+<hr/>
+                    
+				{% endfor %}
+			{% endfor %}
+	</div>
+	
+	<br/>
+<button type="submit" class="save btn btn-default">Save</button>
+</form>
+</div>

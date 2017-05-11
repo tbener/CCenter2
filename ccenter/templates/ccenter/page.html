@@ -1,0 +1,102 @@
+{% extends "ccenter/base.html" %}
+
+<!-- CONTENT -->
+{% block content %}
+
+<h1>{{ page.header }}</h1>
+<h4>{{ page.sub_title }}</h4>
+
+
+<div>
+<!-- form action="{% url 'ccenter:page' page.id %}" method="post" -->
+<form action="" method="post">
+{% csrf_token %}
+
+
+<div class="debug">
+Count of sections: {{ page.sections.all|length }}<br/>
+</div>
+
+{% for section in sections %}
+
+	<div class="inline-group" id="section-{{ section.id }}-group">
+		<br/>
+		<div class="inline-related">
+			<h2>{{ section.header }}</h2>
+			<div class="debug">
+				Count of entities: {{ section.entities.all|length }}<br/>
+			</div>
+			{% for ent in section.entity_list %}
+				{% if ent.entity_type gt 2 %}
+					<div class="debug">
+						Entity of a single value (including dropdown)<br/>
+					</div>
+					
+					{{ ent.values_formset.management_form }}
+					
+					{% for form in ent.values_formset %}
+						
+						{% for hidden in form.hidden_fields %}
+					        {{ hidden }}
+					    {% endfor %}
+					    
+					    <span>
+					    	{{ form.order.as_hidden }}
+					    	{{ form.value_type.as_hidden }}
+					    </span>
+					    
+					    <div class="debug">
+					    	{{ form.instance.value_type }}
+					    </div>
+					    
+						{% if form.errors %}
+							{{ form.errors.as_ul }}
+							<br/>
+						{% endif %} 
+						
+						{% include "ccenter/field.html" %}	
+						
+						
+	                    {% if form.value_field.field.help_text %}
+	                        <p class="help">{{ ent.description|safe }}</p>
+	                    {% endif %}
+	                    
+					{% endfor %}
+				
+				{% else %}
+					<div class="debug">
+						Entity of a multiple values (grid)<br/>
+					</div>
+	
+	<table>
+		<thead><tr>
+		
+		
+		</tr></thead>
+		<tbody>
+		
+		
+		</tbody>
+	</table>
+					
+				{% endif %}
+				
+			{% endfor %}	<!-- Entity -->
+		</div>
+	</div>
+{% endfor %} <!-- Section -->
+
+<br/>
+
+<button type="submit" class="save btn btn-default">Save</button>
+</form>
+</div>
+
+{% endblock %}
+
+
+
+
+
+
+
