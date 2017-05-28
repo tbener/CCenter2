@@ -24,8 +24,7 @@ class dbmBaseAdminStackedInline(admin.StackedInline, dbmBaseInline):
 
 
 from ..models.core import *
-from .page import PageAdmin, SectionAdmin, EntityAdmin
-from .valuedefinitionadmin import EntityValueDefinitionAdmin
+from .page import PageAdmin, SectionAdmin, EntityAdmin, GridRowAdmin, EntityValueDefinitionAdmin
 
 admin.site.register(Folder, BaseAdmin)
 admin.site.register(Page, PageAdmin)
@@ -33,6 +32,7 @@ admin.site.register(Section, SectionAdmin)
 admin.site.register(Entity, EntityAdmin)
 admin.site.register(EntityValueDefinition, EntityValueDefinitionAdmin)
 admin.site.register(Value, BaseAdmin)
+admin.site.register(GridRow, GridRowAdmin)
 
 
 

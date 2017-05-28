@@ -1,4 +1,6 @@
 {% extends "ccenter/base.html" %}
+{% load static %}
+
 
 <!-- CONTENT -->
 {% block content %}
@@ -26,15 +28,15 @@ Count of sections: {{ page.sections.all|length }}<br/>
 			<div class="debug">
 				Count of entities: {{ section.entities.all|length }}<br/>
 			</div>
-			{% for ent in section.entity_list %}
-				{% if ent.entity_type gt 2 %}
+			{% for entity in section.entity_list %}
+				{% if entity.entity_type < 2 %}
 					<div class="debug">
 						Entity of a single value (including dropdown)<br/>
 					</div>
 					
-					{{ ent.values_formset.management_form }}
+					{{ entity.value_definitions.0.values_formset.management_form }}
 					
-					{% for form in ent.values_formset %}
+					{% for form in entity.value_definitions.0.values_formset %}
 						
 						{% for hidden in form.hidden_fields %}
 					        {{ hidden }}
@@ -58,7 +60,7 @@ Count of sections: {{ page.sections.all|length }}<br/>
 						
 						
 	                    {% if form.value_field.field.help_text %}
-	                        <p class="help">{{ ent.description|safe }}</p>
+	                        <p class="help">{{ entity.description|safe }}</p>
 	                    {% endif %}
 	                    
 					{% endfor %}
@@ -67,15 +69,51 @@ Count of sections: {{ page.sections.all|length }}<br/>
 					<div class="debug">
 						Entity of a multiple values (grid)<br/>
 					</div>
-	
+	<h4>{{ entity.header }}</h4>
 	<table>
 		<thead><tr>
-		
-		
+		{% for vdef in entity.value_definitions %}
+			{% if not vdef.is_hidden %}
+	        	<th class="required">{{ vdef.label|capfirst }}
+	        	{% if vdef.help_text %}&nbsp;<img src="{% static "ccenter/img/icon-unknown.svg" %}" class="help help-tooltip" width="10" height="10" alt="({{ vdef.help_text|striptags }})" title="{{ vdef.help_text|striptags }}" />{% endif %}
+	         	</th>
+	       {% endif %}
+		{% endfor %}
+		<!-- Add the Can Delete option here (checkbox for deletion). see Tabular.html -->
 		</tr></thead>
 		<tbody>
-		
-		
+			<!-- non_field_errors here, as a <tr> -->
+			{% for row in entity.rows %}
+			{{ row.values_formset.management_form }}
+			<tr class="form-row {% cycle 'row1' 'row2' %}"
+				id="row-{{ row.index }}-{% if not forloop.last %}{{ forloop.counter0 }}{% else %}empty{% endif %}">
+				<td class="original">
+		          <input name="row{{ row.id }}-{{ forloop.counter0 }}-id" id="id_row{{ row.id }}-{{ forloop.counter0 }}-id" type="hidden" value="{{ row.id }}">
+		          
+		        </td>
+		        
+				{% for form in row.values_formset %}
+		        
+		        <td>
+					 {% if form.instance.value_type == 'boolean_value' %}
+						{{ form.boolean_value.errors }}
+						{{ form.boolean_value }}
+					 {% elif form.instance.value_type == 'integer_value' %}
+					   		{{ form.integer_value.errors }}
+					       	{{ form.integer_value }}
+				     {% else %}
+				       	{{ form.char_value.errors }}
+				       	{{ form.char_value }}
+				     {% endif %}
+				</td>
+		        
+				
+				{% endfor %} 
+			
+			</tr>
+			{% empty %}
+			No rows
+			{% endfor %} 
 		</tbody>
 	</table>
 					
@@ -93,6 +131,7 @@ Count of sections: {{ page.sections.all|length }}<br/>
 </div>
 
 {% endblock %}
+
 
 
 

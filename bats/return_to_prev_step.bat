@@ -1,2 +1,2 @@
-%~dp0run_command migrate fma zero
+%~dp0run_command migrate ccenter 0008
 

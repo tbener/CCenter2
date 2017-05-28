@@ -6,7 +6,7 @@ Created on Sep 4, 2016
 
 from django.contrib import admin
 from .admin import dbmBaseAdminTabularInline, dbmBaseAdminStackedInline, BaseAdmin
-from ..models.core import Page, Section, Entity, ExtendedProperties
+from ..models.core import *
 
 class ExtendedPropertiesAdminInline(dbmBaseAdminStackedInline):
     model = ExtendedProperties
@@ -49,5 +49,18 @@ class PageAdmin(BaseAdmin):
     model = Page
     list_display = ['name', 'short_description']
     inlines = [SectionInline,]
-    
+
+class ValueInline(dbmBaseAdminTabularInline):
+    model = Value
+    # fields = ['section', 'order']
+
+class EntityValueDefinitionAdmin(BaseAdmin):
+    model = EntityValueDefinition
+    #list_display = ('name', 'type_description')
+    inlines = [ValueInline, ]
+
+
+class GridRowAdmin(BaseAdmin):
+    model = GridRow
+    inlines = [ValueInline]
         

@@ -140,6 +140,20 @@ class EntityInSection(models.Model):
 from django.forms import modelformset_factory
 from django.forms import inlineformset_factory
 
+
+class GridRow(models.Model):
+    
+    entity      = models.ForeignKey(Entity)
+    index       = models.IntegerField(default=0)
+    
+    def __str__(self):
+        return "%s (%s)" % (self.index, self.entity)
+    
+    class Meta:
+        app_label = "ccenter"
+        #unique_together = ("entity", "index")
+
+
 # TODO: add an optional Help Text field (need it for grid column)
 # Value definition for a single value, list, or grid column
 class EntityValueDefinition(models.Model):
@@ -152,6 +166,8 @@ class EntityValueDefinition(models.Model):
     order       = models.PositiveSmallIntegerField(default=0, help_text="For grid.")
     attribute   = models.CharField(max_length=50, null=True, help_text="To identify the value by the consumers")
     value_type  = models.CharField(max_length=50, default=_FIELD_TYPE_CHOICES[_SINGLE_VALUE][0], choices=_FIELD_TYPE_CHOICES)
+    help_text   = models.TextField(null=True, blank=True, help_text="Will be displayed on site.")
+    is_hidden   = models.BooleanField(default=False)
     
     def values_formset(self):
         ValuesFormset = inlineformset_factory(EntityValueDefinition, Value, fields=('value_type', 'char_value', 'integer_value', 'boolean_value'), extra=0)
@@ -169,6 +185,7 @@ class Value(models.Model):
     # Every Value references to a single EntityValueDefinition,
     # but in case of List or Grid, multiple values will reference a single EntityValueDefinition.
     value_definition    = models.ForeignKey("EntityValueDefinition")
+    grid_row            = models.ForeignKey(GridRow, null=True)
     is_default          = models.BooleanField(default=True)    # shouldn't be presented. in admin=True, otherwise=False
     order               = models.PositiveSmallIntegerField(default=0, null=True, blank=True)   # for grid or list
     display_value       = models.CharField(max_length=200, null=True, blank=True, help_text="Used for list item display")
@@ -178,6 +195,7 @@ class Value(models.Model):
     boolean_value       = models.BooleanField()
     value_field         = models.CharField(max_length=20, blank=True, null=True)
     is_selected         = models.BooleanField(default=False)    # used for selection from list (dropdown)
+    
     
     
 #     def choices(self):
