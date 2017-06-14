@@ -1,20 +1,7 @@
 from django.shortcuts import get_object_or_404, render
-from .models.core import Page, EntityValueDefinition, Value
+from .models.core import Page, EntityValueDefinition, Value, GridRow, Folder
 from .forms import ValueForm
-
-# Create your views here.
-
-# def page(request, page_id):
-#     p = get_object_or_404(Page, pk=page_id)
-#     
-#     return render(request, 'ccenter/page.html', {'page': p})
-
-from django.forms import inlineformset_factory, modelform_factory, modelformset_factory
-from django.forms.formsets import formset_factory
-from ccenter import forms
-
-from django.forms import BaseInlineFormSet
-from ccenter.models.core import GridRow
+from django.forms import inlineformset_factory, modelformset_factory, BaseInlineFormSet
 
 class NonDefaultValueInlineFormSet(BaseInlineFormSet):
     def get_queryset(self):
@@ -27,25 +14,10 @@ class NonDefaultValueInlineFormSet(BaseInlineFormSet):
 #         super().__init__(*args, **kwargs)
 #         self.queryset = Value.objects.filter(is_default=False)
 
-def page(request, page_id):
-    
-    #ValueForm = modelform_factory(Value, exclude=('value_definition', ))
-    
-    
-#     if request.method == 'POST':
-#         formset = ValueInlineFormSet(request.POST)
-#         if formset.is_valid():
-#             formset.save()
-            
-#         form = PageForm(request.POST)
-#         if form.is_valid():
-#             # do some process...
-#             # resirect?
-#             # return HttpResponseRedirect('/thanks/')
-#             pass
-#     
-#     else:
-#         form = PageForm()
+
+
+
+def page(request, page_id, folder_id=None):
     
     ValueInlineFormSet = inlineformset_factory(EntityValueDefinition, Value, ValueForm, extra=0, formset=NonDefaultValueInlineFormSet)
     ValueFormSet = modelformset_factory(Value, ValueForm)
@@ -69,21 +41,7 @@ def page(request, page_id):
                         if formset.is_valid():
                             formset.save()
                     else:
-                        default_values = vdef.value_set.filter(is_default=True)
-                        non_default_values = vdef.value_set.filter(is_default=False)
-                        
-                        if not non_default_values:
-                            # we create the values based on the defaults
-                            
-                            values_to_clone = default_values
-                            if entity.entity_type == 1: # _LIST
-                                values_to_clone = default_values.filter(is_selected=True)
-                                # TODO: handle no is_selected=True (if dropdown - make one)
-                            
-                            for val in values_to_clone:
-                                val.pk = None
-                                val.is_default = False
-                                val.save()
+                        vdef.generate_non_default_values()
                         
 #                         if entity.entity_type == 2: # _GRID
 #                             # only create the rows from defaults, if necessary
@@ -103,6 +61,7 @@ def page(request, page_id):
             
                
             if entity.entity_type == 2: # _GRID
+                entity.value_definitions = entity.entityvaluedefinition_set.all()
                 entity.rows = entity.gridrow_set.all()
                 for r in entity.rows:
                     prefix="row%s" % r.pk
@@ -116,10 +75,15 @@ def page(request, page_id):
                     r.values_formset = formset
     
     
-    return render(request, 'ccenter/page.html', {'page': p, 'sections': section_list})
+    active_folder = Folder.objects.get(pk=folder_id) if folder_id else None
+    
+    return render(request, 'ccenter/page.html', {'page': p, 'sections': section_list, 'folders': Folder.objects.filter(parent=None), 'active_folder': active_folder})
 
 
 
+
+
+            
 
 def test(request):
     

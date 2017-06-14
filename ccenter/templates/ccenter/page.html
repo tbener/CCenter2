@@ -87,14 +87,12 @@ Count of sections: {{ page.sections.all|length }}<br/>
 			{{ row.values_formset.management_form }}
 			<tr class="form-row {% cycle 'row1' 'row2' %}"
 				id="row-{{ row.index }}-{% if not forloop.last %}{{ forloop.counter0 }}{% else %}empty{% endif %}">
-				<td class="original">
-		          <input name="row{{ row.id }}-{{ forloop.counter0 }}-id" id="id_row{{ row.id }}-{{ forloop.counter0 }}-id" type="hidden" value="{{ row.id }}">
-		          
-		        </td>
-		        
+						        
 				{% for form in row.values_formset %}
 		        
 		        <td>
+		        	<input name="row{{ row.id }}-{{ forloop.counter0 }}-id" id="id_row{{ row.id }}-{{ forloop.counter0 }}-id" type="hidden" value="{{ form.instance.id }}">
+		        	
 					 {% if form.instance.value_type == 'boolean_value' %}
 						{{ form.boolean_value.errors }}
 						{{ form.boolean_value }}

@@ -1,0 +1,215 @@
+﻿#site-name {
+    text-align: center;
+    /*float: left;*/
+    /*margin-left: 30px;*/
+}
+
+.top-button {
+    border: 2px solid #5b80b2;
+    background: #7CA0C7 url(../img/default-bg.gif) bottom repeat-x;
+    /* font-weight: bold; */
+    color: white;
+    float: left;
+    width: 96px;
+    height: 15px;
+    text-align: center;
+    margin-left: 10px;
+    margin-top: 1px;
+    padding-top: 2px;
+    cursor: pointer;
+}
+
+a.import-button {
+    border: 2px solid #5b80b2;
+    background: #7CA0C7 url(../img/default-bg.gif) bottom repeat-x;
+    /* font-weight: bold; */
+    color: white;
+    text-align: center;
+    padding-top: 2px;
+    cursor: pointer;
+    display: block;
+    margin-top: 5px;
+    width: 100px;
+}
+
+#header a.top-button:hover {
+    text-decoration: none;
+}
+
+#header .action-buttons {
+    position: absolute;
+    top: 10px;
+    
+    
+}
+
+ul.action-buttons  {
+    list-style-type: none;
+    margin: 10px 16px;
+    padding: 0;
+}
+
+.action-buttons li {
+    list-style-type: none;
+}
+
+.action-buttons a {
+    line-height: 18px;
+    color: #616161;
+    font-size: 110%;
+}
+
+#error-nothing-selected {
+    display: none;
+}
+
+
+/*
+    TreeView
+*/
+
+
+/* .jstree li > a > .jstree-icon {  display:none !important; }  */
+
+
+#treeview {
+    margin-top: 5px;
+    border:1px solid #cccccc;
+    top: 0px;
+    /*position: absolute;*/
+    width: 200px;
+    background-color: white;
+    
+    float:left; 
+    padding:6px; 
+    margin:10,0;  
+    overflow:auto;
+}
+
+
+
+
+#treeview .page-icon .jstree-icon {
+    background: url(http://jstree.com/tree.png);
+}
+
+#form-import #id_file {
+    width: 500px;
+}
+
+
+/*
+    ------------------
+*/
+
+#form-import .errorlist li {
+    margin-left: 36px;
+    width: 500px;
+}
+
+#form-import .button-wrap {
+    width: 569px;
+}
+
+
+.left-wrap {
+    position: fixed;
+    top: 50px;
+    padding-left: 4px;
+}
+
+.tree-wrap {
+    height: 100%;
+}
+
+
+
+.dbmotion-changed {
+	/* border: 2px solid #dd0; */
+    background: #FFFF99;
+}
+
+
+
+h1#page_header
+{
+	color:#009e0f;
+	font-weight: bold
+}
+
+h1#affected_services
+{
+	font-weight: bold
+}
+
+h1#restarted_services
+{
+	font-weight: bold
+}
+h1#affected_services
+{
+	font-weight: bold;
+	color:#085394
+}
+.field{
+    float: left; white-space: nowrap;
+}
+.required::after {
+    content: "*";
+    color: red
+}
+
+
+/* Change readonly inputs look and feel as that of a Label */
+[readonly="readonly"],
+[readonly="readonly"]:focus,
+select[readonly="readonly"],
+select[readonly="readonly"]:focus,
+input[readonly="readonly"],
+input[readonly="readonly"]:focus,
+.content input[type="text"][readonly]:focus,
+textarea[readonly]:focus,
+select[readonly]:focus {
+    background: none repeat scroll 0 0 transparent;
+    border: medium none !important;
+    color: #000000;
+}
+
+
+div.page-help{
+	margin: 10px 0px;
+	font-size: 11px !important;
+    color: #999;
+}
+
+.page-help li{
+	font-size: 11px !important;
+    color: #999;
+}
+
+
+.center{
+	border: 2px solid #333333;
+	background: white;
+	top: 200px;
+	left: 50%;
+	margin-left: -100px;
+	height: 50px;
+	width: 200px;
+	text-align: center;
+	position: fixed;
+	font-size: 18px;
+	padding-top: 16px;
+}
+
+/* This style provides the spinner.
+In the html only the text in needed 
+e.g. <div class="loading">Loading...</div>
+*/
+.loading{
+	font-size: 14px;
+	margin-top: 50px;
+	background: url(/static/img/loading.gif) left no-repeat;
+	padding-left: 22px;
+}
+

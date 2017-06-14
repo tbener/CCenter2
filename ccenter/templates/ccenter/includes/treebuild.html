@@ -1,0 +1,13 @@
+		<ul>
+		{% for folder in folders %}
+			{% if folder.page or folder.subfolders %}
+			<li data-jstree='{ {% if folder.page.folder == page.folder %}"opened":true,"selected":true{% endif %} }' id="{% if folder.id %}{{ folder.id }}{% else %}p{{ folder.page.id }}{% endif %}">
+				<a href="{% if folder.page %}{% url 'ccenter:folder-page' folder.folder.id folder.page.id %}{% else %}#{% endif %}">{{ folder.name }}</a>
+				
+				{% if folder.subfolders %}
+					{% include "ccenter/includes/treebuild.html" with folders=folder.subfolders %} 
+				{% endif %}
+			</li>
+			{% endif %}
+		{% endfor %}
+		</ul>

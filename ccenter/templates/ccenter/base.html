@@ -1,16 +1,26 @@
 {% load static %}<!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
 <head>
-<meta http-equiv="x-ua-compatible" content="IE=edge" >
-<title>{% block title %}{% endblock %}</title>
+	<meta http-equiv="x-ua-compatible" content="IE=edge" >
+	<title>{% block title %}{% endblock %}</title>
 
-<link rel="stylesheet" type="text/css" href="{% static 'ccenter/css/base.css' %}"/>
-<link rel="stylesheet" type="text/css" href="{% static 'ccenter/css/debug.css' %}"/>
+	<link rel="stylesheet" type="text/css" href="{% static 'ccenter/css/base.css' %}"/>
+	<link rel="stylesheet" type="text/css" href="{% static 'ccenter/css/dbmotion_admin_extensions.css' %}"/>
+	<link rel="stylesheet" type="text/css" href="{% static 'ccenter/css/debug.css' %}"/>
+	
+	<link rel="stylesheet" href="{% static 'jstree/themes/default/style.min.css' %}" />
 
-{% block extrastyle %}
+	{% block extrastyle %}
+	
+	{% endblock %}
 
-{% endblock %}
+	<script src="{% static 'jquery/jquery-3.2.1.min.js' %}" type="text/javascript"></script>
+	
+	<!-- cript src="{% static 'jquery/jsTree/_lib/jquery.cookie.js' %}" type="text/javascript"></script>
+		<script src="{% static 'jquery/jsTree/_lib/jquery.hotkeys.js' %}" type="text/javascript"></script-->
+	<script src="{% static 'jstree/jstree.min.js' %}" type="text/javascript"></script>
 
+	
 
 </head>
 {% load i18n %}
@@ -35,7 +45,7 @@
         </ul>
         
         <div class="tree-wrap">
-            
+            {% include "ccenter/includes/treeview.html" %}
         </div>
     </div>
    
@@ -56,6 +66,55 @@
     {% block footer %}<div id="footer"></div>{% endblock %}
 </div>
 <!-- END Container -->
+
+<script type="text/javascript" class="source below">
+	
+	$(function(){
+		function setTreeviewHeight(argument) {
+	        tree = $('.left-wrap #treeview'); 
+	        if (tree.position() != "undefined")
+	        tree.height($(window).height() - tree.position().top - 80);
+	    }
+	    setTreeviewHeight();
+	
+	    $( window ).resize(function() {
+	        setTreeviewHeight();
+	    });
+	    
+	    $("#treeview").jstree({
+	    	
+	    	"types" : {
+                "page1111111" : {
+                    "icon" : { "image" : "/ccenter/static/img/page.png"},
+                }
+            },
+            "themes": {
+                "dots": false,
+            },
+            "plugins" : [ "themes", "types" ],
+            "core" : { "initially_select" : [ "#p2" ] }
+	    })
+	    
+	    .on("changed.jstree", function (e, data) {
+			if(data.selected.length) {
+				//alert('The selected node is: ' + data.instance.get_node(data.selected[0]).text);
+			}
+		})
+		.delegate("a","click", function(e) {
+            if ($("#treeview").jstree("is_leaf", this)) {
+                document.location.href = this;
+            }
+            else {
+                $("#treeview").jstree("toggle_node", this);
+            }
+		});
+		
+        
+	
+	});
+
+
+</script>
 
 </body>
 </html>

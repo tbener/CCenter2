@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.forms import inlineformset_factory
 
 _SINGLE_VALUE = 0
 _LIST = 1
@@ -29,7 +30,7 @@ _FIELD_TYPE_CHOICES_DICT = dict((k, v) for k, v in _FIELD_TYPE_CHOICES)
 # a base class for main entities (page, section, entity...)
 # abstract - will not stand alone as a table in the database.
 class BaseModel(models.Model):
-    name        = models.CharField(max_length=50, help_text="A unique explanatory name. Will not be displayed on site.")
+    name        = models.CharField(max_length=50)
     header      = models.CharField(max_length=50, help_text="Will be displayed on site.")
     help_text   = models.TextField(null=True, blank=True, help_text="Will be displayed on site.")
     description = models.TextField(null=True, blank=True, help_text="Internal. Will not be displayed on site.")
@@ -42,21 +43,36 @@ class Folder(models.Model):
     name        = models.CharField(max_length=50)
     parent      = models.ForeignKey("Folder", null=True, blank=True)
     
+    # the subfolders of a folder are a combination of the folders AND PAGES that linked to that folder.
+    def subfolders(self):
+        sf = list(self.folder_set.all())  # returns a list of all folder which self is their parent
+        for page in self.page_set.all():
+            f = Folder(name = page.name)
+            f.page = page
+            f.folder = self
+            sf.append(f)
+              
+        return sf
+    
     def __str__(self):
         return self.name
     
     class Meta:
         app_label = "ccenter"
 
+from django.urls import reverse
 
 class Page(BaseModel):
-    folder      = models.ForeignKey("Folder")
+    folder      = models.ManyToManyField("Folder")
     sub_title   = models.CharField(max_length=100, null=True, blank=True)
     sections    = models.ManyToManyField("Section", through='SectionInPage')
     
     def short_description(self):
         sections_count = self.sections.count()
         return ', '.join(s.header for s in self.sections.all()) if self.sections else 'No sections'
+    
+    def admin_url(self):
+        return reverse('admin:ccenter_page_change', args=(self.id,))
     
     def __str__(self):
         return self.name
@@ -77,7 +93,12 @@ class Section(BaseModel):
         return '{name} (appears in {pages})'.format(name=self.header, pages=inpages)
     
     def pages(self):
-        return ', '.join(str(p) for p in self.page_set.all())
+        change_link = '<a href="#" onclick="alert(\'Not active yet\')">Add...</a>'
+        page_link_template = '<a href="{link}">{name}</a>'
+        return  '<br/>'.join(page_link_template.format(link=p.admin_url(), name=str(p)) for p in self.page_set.all()) + '<br/>' + change_link
+    
+    pages.allow_tags = True
+    pages.short_description = 'Pages'
     
     class Meta:
         app_label = "ccenter"
@@ -86,14 +107,31 @@ class Section(BaseModel):
 class SectionInPage(models.Model):
     page        = models.ForeignKey(Page)
     section     = models.ForeignKey(Section)
-    order       = models.PositiveSmallIntegerField(default=0)
+    order       = models.PositiveIntegerField(default=0)
     
     class Meta:
         app_label = "ccenter"
 
+_ENTITY_SINGLE_TYPE_CHOICES = [
+    (0, 'Default'),
+    (1, 'Drop down'),
+    (2, 'Radio Buttons'),
+    ]
+
+_ENTITY_LIST_TYPE_CHOICES = [
+    (0, 'Default'),
+    (1, 'Check boxes'),
+    ]
+
 class Entity(BaseModel):
     # An Entity is a representation of data. It could be a single value, a list, or a grid
-    entity_type  = models.IntegerField(verbose_name="type", choices=_ENTITY_TYPE_CHOICES, default=0) 
+    entity_type             = models.IntegerField(verbose_name="type", choices=_ENTITY_TYPE_CHOICES, default=0) 
+    single_value_options    = models.IntegerField(verbose_name="show as", choices=_ENTITY_SINGLE_TYPE_CHOICES, default=0)
+    list_value_options      = models.IntegerField(verbose_name="show as", choices=_ENTITY_LIST_TYPE_CHOICES, default=0)
+    list_grid_allow_add     = models.BooleanField(verbose_name="allow add", default=True)
+    list_grid_allow_delete  = models.BooleanField(verbose_name="allow delete", default=True)
+    list_grid_min           = models.IntegerField(verbose_name="minimum items", default=0)
+    list_grid_max           = models.IntegerField(verbose_name="maximum items", default=None, blank=True, null=True, help_text="Leave blank for no limit.")
     
     def type_description(self):
         
@@ -136,42 +174,60 @@ class EntityInSection(models.Model):
     
     class Meta:
         app_label = "ccenter"
+        verbose_name_plural = "Entities in Section"
         
-from django.forms import modelformset_factory
-from django.forms import inlineformset_factory
+
 
 
 class GridRow(models.Model):
     
-    entity      = models.ForeignKey(Entity)
-    index       = models.IntegerField(default=0)
+    entity          = models.ForeignKey(Entity)
+    order           = models.IntegerField(default=0)
+    is_default      = models.BooleanField(default=True)    # shouldn't be presented. in admin=True, otherwise=False
     
     def __str__(self):
-        return "%s (%s)" % (self.index, self.entity)
+        return "%s (%s)" % (self.order, self.entity)
     
     class Meta:
         app_label = "ccenter"
         #unique_together = ("entity", "index")
 
 
-# TODO: add an optional Help Text field (need it for grid column)
 # Value definition for a single value, list, or grid column
 class EntityValueDefinition(models.Model):
     # This Model is used to define the value of the Entity, according to its type.
     # If the Entity is of type Single Value or a List, then one EntityValueDefinition instance will represent it.
     # If the Entity is of type Grid, then each instance of EntityValueDefinition represents a column.
     # If the type is List or Grid, then multiple Values will be related to each EntityValueDefinition.
-    entity      = models.ForeignKey("Entity", null=True)
+    entity      = models.ForeignKey("Entity", null=True, blank=True)
     label       = models.CharField(max_length=50, help_text="According to the Entity type, this will be the field label or the column header.")
-    order       = models.PositiveSmallIntegerField(default=0, help_text="For grid.")
-    attribute   = models.CharField(max_length=50, null=True, help_text="To identify the value by the consumers")
+    order       = models.PositiveIntegerField(default=0, help_text="For grid.")
+    attribute   = models.CharField(max_length=50, null=True, blank=True, help_text="To identify the value by the consumers")
     value_type  = models.CharField(max_length=50, default=_FIELD_TYPE_CHOICES[_SINGLE_VALUE][0], choices=_FIELD_TYPE_CHOICES)
     help_text   = models.TextField(null=True, blank=True, help_text="Will be displayed on site.")
     is_hidden   = models.BooleanField(default=False)
+    select_from = models.ForeignKey("EntityValueDefinition", verbose_name="select from list", blank=True, null=True)  # can be used to hold the list (choices) for the parent vdef
+    
+   
+    def admin_link(self):
+        return '<a href="%s">%s</a>' % (reverse('admin:ccenter_entityvaluedefinition_change', args=(self.id,)), self)
+    
+    admin_link.short_description = ''
+    admin_link.allow_tags = True
     
     def values_formset(self):
         ValuesFormset = inlineformset_factory(EntityValueDefinition, Value, fields=('value_type', 'char_value', 'integer_value', 'boolean_value'), extra=0)
         return ValuesFormset(instance = self)
+    
+    
+    def generate_non_default_values(self):
+        if not self.value_set.filter(is_default=False):
+            def_values = self.value_set.filter(is_default=True)
+            for val in def_values:
+                val.pk = None
+                val.is_default = False
+                val.save()
+                        
     
     def __str__(self):
         return self.label   # + " (EntityValueDefinition)"
@@ -185,11 +241,10 @@ class Value(models.Model):
     # Every Value references to a single EntityValueDefinition,
     # but in case of List or Grid, multiple values will reference a single EntityValueDefinition.
     value_definition    = models.ForeignKey("EntityValueDefinition")
-    grid_row            = models.ForeignKey(GridRow, null=True)
+    grid_row            = models.ForeignKey(GridRow, null=True, blank=True)
     is_default          = models.BooleanField(default=True)    # shouldn't be presented. in admin=True, otherwise=False
-    order               = models.PositiveSmallIntegerField(default=0, null=True, blank=True)   # for grid or list
+    order               = models.PositiveIntegerField(default=0, null=True, blank=True)   # for grid or list
     display_value       = models.CharField(max_length=200, null=True, blank=True, help_text="Used for list item display")
-    # value_type          = models.CharField(max_length=50, default=_FIELD_TYPE_CHOICES[0][0], choices=_FIELD_TYPE_CHOICES)
     char_value          = models.CharField(max_length=200, null=True, blank=True)
     integer_value       = models.IntegerField(null=True, blank=True)        #, validators=[MinValueValidator(5)])
     boolean_value       = models.BooleanField()
@@ -198,15 +253,6 @@ class Value(models.Model):
     
     
     
-#     def choices(self):
-#         if self.value_definition.entity.value_type == _LIST:
-#             l = self.value_definition.value_set.filter(is_default=True)
-#             return [(getattr(v, v.actual_field_value), v.display_value) for v in l]
-#             
-#         return None
-#     
-#     integer_value.choices = choices
-
     # this will be used in the template
     def value_type(self):
         return self.value_definition.value_type
@@ -217,11 +263,26 @@ class Value(models.Model):
     def is_list(self):
         return self.value_definition.entity.entity_type == _LIST
     
+    # choices returns 2 variables: True if there are choices (more than one). and the choices as a list.
+    # choices are used in 2 cases:
+    # 1. Single value with multiple defaults
+    # 2. Grid - a columns can be represented by choices
+    def choices(self):
+        if self.value_definition.select_from:
+            list_items = self.value_definition.select_from.value_set.all()
+            ch = [(v.actual_field_value(), v.display_value) for v in list_items]
+            return len(ch)>1, ch
+        return False, None
+    
     def __str__(self):
-        return str(self.value_definition) + ('[{0}]'.format(self.order) if self.order else "") + " (%s Value)" % "Default " if self.is_default else ""
+        val = self.display_value or str(self.actual_field_value())
+        if self.is_default:
+            val += " (Default)"
+        return val
     
     class Meta:
         app_label = "ccenter"
+        ordering = ['order']
 
 
 # TBD

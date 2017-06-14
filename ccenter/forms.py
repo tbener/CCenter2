@@ -4,11 +4,22 @@ Created on Jun 30, 2016
 @author: TBENER
 '''
 from django import forms
-from django.forms import inlineformset_factory
 from django.utils.functional import curry
-from ccenter.models import Value, EntityValueDefinition
 from django.forms.models import BaseModelFormSet
 
+from .models.core import Value, EntityValueDefinition
+
+
+class EntityValueDefinitionForm(forms.ModelForm):
+    
+    def __init__(self, *args, **kwargs):
+        super(EntityValueDefinitionForm, self).__init__(*args, **kwargs)
+        # TODO: set queryset to get only vdefs that can be used as lists.
+        #self.fields['select_from'].quesryset = EntityValueDefinition.objects.filter(value_set)
+    
+    class Meta:
+        model = EntityValueDefinition
+        fields = ['entity', 'label', 'attribute', 'value_type', 'select_from', 'help_text']
 
 
 class ValueForm(forms.ModelForm):
@@ -18,16 +29,18 @@ class ValueForm(forms.ModelForm):
     
     class Meta:
         model = Value
-        exclude = ['value_field']
+        exclude = ['value_field', 'value_definition']
         
     def __init__(self, *args, **kwargs):
         super(ValueForm, self).__init__(*args, **kwargs)
+        
+        # if this value should be selected from list, then we need to change the widget of the 
+        #    correct field to Select.
         if not self.instance.is_default:
-            val = self.instance
-            if self.instance.is_list():
-                list_items = val.value_definition.value_set.filter(is_default=True)
-                ch = [(v.actual_field_value(), v.display_value) for v in list_items]
-                self.fields[val.value_type()].widget = forms.Select(choices=ch)
+            #if self.instance.
+            has_choices, choices = self.instance.choices()
+            if has_choices:
+                self.fields[self.instance.value_type()].widget = forms.Select(choices=choices)
 
 
 
