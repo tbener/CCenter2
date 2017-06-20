@@ -7,10 +7,11 @@ Created on Sep 4, 2016
 from django.contrib import admin
 from .admin import dbmBaseAdminTabularInline, dbmBaseAdminStackedInline, BaseAdmin
 from ..models.core import *
+from CCenter2.constants import *
 
 class EntityValueDefinitionInline(dbmBaseAdminTabularInline):
     model = EntityValueDefinition
-    fields = ['admin_link']
+    fields = ['label', 'admin_link']
     readonly_fields = ['admin_link']
 
 class EntityAdmin(BaseAdmin):
@@ -54,17 +55,17 @@ class SectionAdmin(BaseAdmin):
     inlines = [EntityInline]
     fieldsets = [
         (None,          {'fields': ['name', 'help_text', 'pages']}),
-        ('More',        {'fields': ['description'], 'classes': ['collapse']})
+        ('More',        {'fields': ['description'], 'classes': [class_collapse]})
         ]
     readonly_fields = ['pages']
 
 class PageAdmin(BaseAdmin):
     model = Page
-    list_display = ['name', 'short_description']
+    list_display = ['name', 'sub_title', 'section_links']
     inlines = [SectionInline,]
     fieldsets = [
         (None,                  {'fields': ['name', 'sub_title', 'folder']}),
-        ('More',                {'fields': ['description'], 'classes': ['grp-collapse grp-closed']})
+        ('More',                {'fields': ['description'], 'classes': [class_collapse]})
         ]
 
 class DefaultValuesInline(dbmBaseAdminTabularInline):

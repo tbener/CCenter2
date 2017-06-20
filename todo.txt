@@ -1,0 +1,13 @@
+Admin
+
+Page
+- add link to edit Section
+- order Sections
+
+Section
+- hide "Add Entity" option on popup
+
+Entity
+- hide Header field
+- define: help_text will come before the control. vdef help_text will come after (or for column)
+- collapse Description

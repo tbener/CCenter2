@@ -46,11 +46,12 @@ class Folder(models.Model):
     # the subfolders of a folder are a combination of the folders AND PAGES that linked to that folder.
     def subfolders(self):
         sf = list(self.folder_set.all())  # returns a list of all folder which self is their parent
-        for page in self.page_set.all():
-            f = Folder(name = page.name)
-            f.page = page
-            f.folder = self
-            sf.append(f)
+        if self.id:
+            for page in self.page_set.all():
+                f = Folder(name = page.name)
+                f.page = page
+                f.folder = self
+                sf.append(f)
               
         return sf
     
@@ -67,11 +68,13 @@ class Page(BaseModel):
     sub_title   = models.CharField(max_length=100, null=True, blank=True)
     sections    = models.ManyToManyField("Section", through='SectionInPage')
     
-    def short_description(self):
-        sections_count = self.sections.count()
-        return ', '.join(s.header for s in self.sections.all()) if self.sections else 'No sections'
+    def section_links(self):
+        return ' | '.join(s.name_as_link() for s in self.sections.all()) if self.sections else 'No sections'
     
-    def admin_url(self):
+    section_links.allow_tags = True
+    section_links.short_description = "sections"
+    
+    def admin_change_url(self):
         return reverse('admin:ccenter_page_change', args=(self.id,))
     
     def __str__(self):
@@ -90,15 +93,23 @@ class Section(BaseModel):
     
     def long_name(self):
         inpages = ', '.join(self.page_set.all())
-        return '{name} (appears in {pages})'.format(name=self.header, pages=inpages)
+        return '{name} (appears in {pages})'.format(name=self.name, pages=inpages)
     
     def pages(self):
         change_link = '<a href="#" onclick="alert(\'Not active yet\')">Add...</a>'
         page_link_template = '<a href="{link}">{name}</a>'
-        return  '<br/>'.join(page_link_template.format(link=p.admin_url(), name=str(p)) for p in self.page_set.all()) + '<br/>' + change_link
+        return  '<br/>'.join(page_link_template.format(link=p.admin_change_url(), name=str(p)) for p in self.page_set.all()) + '<br/>' + change_link
     
     pages.allow_tags = True
     pages.short_description = 'Pages'
+    
+    def admin_change_url(self):
+        return reverse('admin:ccenter_section_change', args=(self.id,))
+    
+    def name_as_link(self):
+        return '<a href="{link}">{name}</a>'.format(name=self.name, link=self.admin_change_url())
+    
+    name_as_link.allow_tags = True
     
     class Meta:
         app_label = "ccenter"

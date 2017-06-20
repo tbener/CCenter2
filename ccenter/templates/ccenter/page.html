@@ -5,12 +5,11 @@
 <!-- CONTENT -->
 {% block content %}
 
-<h1>{{ page.header }}</h1>
+<h1>{{ page.name }}</h1>
 <h4>{{ page.sub_title }}</h4>
 
 
 <div>
-<!-- form action="{% url 'ccenter:page' page.id %}" method="post" -->
 <form action="" method="post">
 {% csrf_token %}
 
@@ -24,7 +23,7 @@ Count of sections: {{ page.sections.all|length }}<br/>
 	<div class="inline-group" id="section-{{ section.id }}-group">
 		<br/>
 		<div class="inline-related">
-			<h2>{{ section.header }}</h2>
+			<h2>{{ section.name }}</h2>
 			<div class="debug">
 				Count of entities: {{ section.entities.all|length }}<br/>
 			</div>
