@@ -11,7 +11,7 @@ from CCenter2.constants import *
 
 class EntityValueDefinitionInline(dbmBaseAdminTabularInline):
     model = EntityValueDefinition
-    fields = ['label', 'admin_link']
+    fields = ['label', 'order', 'value_type', 'admin_link']
     readonly_fields = ['admin_link']
 
 class EntityAdmin(BaseAdmin):

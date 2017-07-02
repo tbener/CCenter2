@@ -36,6 +36,7 @@ def page(request, page_id=None, folder_id=None):
             ent_list = section.entities.all()
             section.entity_list = ent_list
             for entity in section.entity_list:
+                entity.generate_non_default_values()
                 if entity.entity_type in (0, 1):
                     entity.value_definitions = []
                     for vdef in entity.entityvaluedefinition_set.all():

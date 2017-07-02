@@ -162,7 +162,60 @@ class Entity(BaseModel):
             return "List of type %s" % val_type
         
         return val_type
+    
+    def verify_default_values(self):
+        if self.entity_type == _GRID:
+            # we need to compute the Grid Rows in conjunction with the Columns
+            # GridRow - EntityValueDefinition
+            pass
+        
+    def generate_non_default_values(self):
+        if self.entity_type == _GRID:
+            vdef_list = self.entityvaluedefinition_set.all()
+            if Value.objects.filter(value_definition__in = vdef_list).filter(is_default = False):
+                return
+            # get number of rows by column (vdef) with max values
+            row_num = 0
+            for vdef in vdef_list:
+                row_num = max(row_num, vdef.value_set.filter(is_default=True).count())
 
+            # get the existing rows
+            rows = list(self.gridrow_set.filter(is_default=True).order_by('order'))
+            # add missing rows
+            for i in range(len(rows), row_num):
+                rows.append(GridRow(entity=self, is_default=True))
+            # set order for all
+            for i, r in enumerate(rows):
+                r.order = i
+                r.save()
+                
+            # for every column (vdef) go over the values and attach it to a row
+            for vdef in self.entityvaluedefinition_set.all():
+                # todo: handle a vdef with not enough values (we took the max)
+                for index, val in enumerate(vdef.value_set.order_by('order')):
+                    val.order = index
+                    val.grid_row = rows[index]
+                    val.save()
+            
+            #####
+            # on that point we should have the default values arranged
+            #####
+            
+            # starting to create values. we assume no non-default values exist 
+            for r in rows:
+                non_def_row = r
+                # create and save a non-default row
+                non_def_row.pk = None
+                non_def_row.is_default = False
+                non_def_row.save()
+                for v in r.value_set.all():
+                    v.pk = None
+                    v.grid_row = non_def_row
+                    v.save()
+                
+            
+            
+                
     def __str__(self):
         return "{} ({})".format(self.name, self.type_description()) 
     
@@ -198,6 +251,10 @@ class GridRow(models.Model):
     
     def __str__(self):
         return "%s (%s)" % (self.order, self.entity)
+    
+    def get_or_create_non_default(self):
+        r, created = GridRow.objects.get_or_create(is_default=False, order=self.order, entity=self.entity)
+        return r
     
     class Meta:
         app_label = "ccenter"
