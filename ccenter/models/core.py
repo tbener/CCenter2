@@ -171,8 +171,10 @@ class Entity(BaseModel):
         
     def generate_non_default_values(self):
         if self.entity_type == _GRID:
+            # get columns definition
             vdef_list = self.entityvaluedefinition_set.all()
             if Value.objects.filter(value_definition__in = vdef_list).filter(is_default = False):
+                # if we found non-default values - return
                 return
             # get number of rows by column (vdef) with max values
             row_num = 0
@@ -202,14 +204,13 @@ class Entity(BaseModel):
             #####
             
             # starting to create values. we assume no non-default values exist 
-            for r in rows:
-                non_def_row = r
-                # create and save a non-default row
-                non_def_row.pk = None
-                non_def_row.is_default = False
-                non_def_row.save()
-                for v in r.value_set.all():
+            for default_row in rows:
+                # create non-default row
+                non_def_row = default_row.get_or_create_non_default()
+                # for every def val we create a non-def val and attach it to the non-def row
+                for v in default_row.value_set.all():
                     v.pk = None
+                    v.is_default = False
                     v.grid_row = non_def_row
                     v.save()
                 

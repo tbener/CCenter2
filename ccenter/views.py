@@ -37,7 +37,7 @@ def page(request, page_id=None, folder_id=None):
             section.entity_list = ent_list
             for entity in section.entity_list:
                 entity.generate_non_default_values()
-                if entity.entity_type in (0, 1):
+                if entity.entity_type in (0, 1):    # Single \ List
                     entity.value_definitions = []
                     for vdef in entity.entityvaluedefinition_set.all():
                         prefix = 'value_set-%s' % vdef.pk
@@ -68,7 +68,7 @@ def page(request, page_id=None, folder_id=None):
                    
                 if entity.entity_type == 2: # _GRID
                     entity.value_definitions = entity.entityvaluedefinition_set.all()
-                    entity.rows = entity.gridrow_set.all()
+                    entity.rows = entity.gridrow_set.filter(is_default=False)
                     for r in entity.rows:
                         prefix="row%s" % r.pk
                         if request.method == 'POST':
