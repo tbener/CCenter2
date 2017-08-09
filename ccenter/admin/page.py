@@ -13,11 +13,14 @@ class EntityValueDefinitionInline(dbmBaseAdminTabularInline):
     model = EntityValueDefinition
     fields = ['label', 'order', 'value_type', 'admin_link']
     readonly_fields = ['admin_link']
+    
+class SectionsForEntityInline(dbmBaseAdminTabularInline):
+    model = Section.entities.through
 
 class EntityAdmin(BaseAdmin):
     model = Entity
     list_display = ('name', 'type_description')
-    inlines = [EntityValueDefinitionInline,]
+    inlines = [EntityValueDefinitionInline, SectionsForEntityInline]
     
     class Media:
         js = ('admin/js/entity.js', )

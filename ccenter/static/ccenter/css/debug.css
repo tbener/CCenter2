@@ -1,4 +1,4 @@
 
-div.debug{
-	visibility: collapse;
+.debug{
+	display: none;
 }
