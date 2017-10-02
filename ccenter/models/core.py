@@ -123,6 +123,7 @@ class SectionInPage(models.Model):
     class Meta:
         app_label = "ccenter"
 
+
 _ENTITY_SINGLE_TYPE_CHOICES = [
     (0, 'Default'),
     (1, 'Drop down'),
@@ -136,6 +137,7 @@ _ENTITY_LIST_TYPE_CHOICES = [
 
 class Entity(BaseModel):
     # An Entity is a representation of data. It could be a single value, a list, or a grid
+    parent_entity           = models.ForeignKey('Entity', default=None, null=True)
     entity_type             = models.IntegerField(verbose_name="type", choices=_ENTITY_TYPE_CHOICES, default=0) 
     single_value_options    = models.IntegerField(verbose_name="show as", choices=_ENTITY_SINGLE_TYPE_CHOICES, default=0)
     list_value_options      = models.IntegerField(verbose_name="show as", choices=_ENTITY_LIST_TYPE_CHOICES, default=0)
