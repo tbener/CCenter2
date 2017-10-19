@@ -30,6 +30,7 @@ Count of sections: {{ page.sections.all|length }}<br/>
 				Count of entities: {{ section.entities.all|length }}<br/>
 			</div>
 			{% for entity in section.entity_list %}
+				<div class="entity" style="margin-top:10px">
 				{% if entity.entity_type < 2 %}
 					<div class="debug">
 						Entity of a single value (including dropdown)<br/>
@@ -117,7 +118,7 @@ Count of sections: {{ page.sections.all|length }}<br/>
 	</table>
 					
 				{% endif %}
-				
+				</div>
 			{% endfor %}	<!-- Entity -->
 		</div>
 	</div>
