@@ -77,6 +77,9 @@ class Page(BaseModel):
     def admin_change_url(self):
         return reverse('admin:ccenter_page_change', args=(self.id,))
     
+    def get_absolute_url(self):
+        return reverse('ccenter:page', args=[str(self.id)])
+    
     def __str__(self):
         return self.name
     
