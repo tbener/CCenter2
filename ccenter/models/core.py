@@ -78,8 +78,7 @@ class Page(BaseModel):
         return reverse('admin:ccenter_page_change', args=(self.id,))
     
     def get_absolute_url(self):
-        folder_id = self.folder_set.first().name if self.folder_set else 1
-        return "/%s/%i/" % (folder_id, self.id)
+        return reverse('ccenter:page', args=[str(self.id)])
     
     def __str__(self):
         return self.name
