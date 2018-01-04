@@ -1,5 +1,9 @@
 from django.shortcuts import get_object_or_404, render
-from .models.core import Page, EntityValueDefinition, Value, GridRow, Folder
+from ccenter.models.page import Page
+from ccenter.models.tag import Tag
+from ccenter.models.entity import Entity
+from ccenter.models.field import Field
+from ccenter.models.value import Value
 from .forms import ValueForm
 from django.forms import inlineformset_factory, modelformset_factory, BaseInlineFormSet
 
@@ -16,14 +20,14 @@ class NonDefaultValueInlineFormSet(BaseInlineFormSet):
 
 
 def home(request):
-    return render(request, 'ccenter/home.html', {'folders': Folder.objects.filter(parent=None)})
+    return render(request, 'ccenter/home.html', {'folders': Tag.objects.filter(parent=None)})
 
 def page(request, page_id=None, folder_id=None):
     
-    ValueInlineFormSet = inlineformset_factory(EntityValueDefinition, Value, ValueForm, extra=0, formset=NonDefaultValueInlineFormSet)
+    ValueInlineFormSet = inlineformset_factory(Field, Value, ValueForm, extra=0, formset=NonDefaultValueInlineFormSet)
     ValueFormSet = modelformset_factory(Value, ValueForm)
     
-    RowValueInlineFormSet = inlineformset_factory(GridRow, Value, ValueForm, extra=0)
+    #RowValueInlineFormSet = inlineformset_factory(GridRow, Value, ValueForm, extra=0)
     
     p = None
     section_list = None
@@ -66,24 +70,24 @@ def page(request, page_id=None, folder_id=None):
                         entity.value_definitions.append(vdef)
                 
                    
-                if entity.entity_type == 2: # _GRID
-                    entity.value_definitions = entity.entityvaluedefinition_set.all()
-                    entity.rows = entity.gridrow_set.filter(is_default=False)
-                    for r in entity.rows:
-                        prefix="row%s" % r.pk
-                        if request.method == 'POST':
-                            formset = RowValueInlineFormSet(request.POST, instance=r, prefix = prefix)
-                            if formset.is_valid():
-                                formset.save()
-                        else:
-                            formset = RowValueInlineFormSet(instance=r, prefix=prefix)
-                        
-                        r.values_formset = formset
+#                 if entity.entity_type == 2: # _GRID
+#                     entity.value_definitions = entity.entityvaluedefinition_set.all()
+#                     entity.rows = entity.gridrow_set.filter(is_default=False)
+#                     for r in entity.rows:
+#                         prefix="row%s" % r.pk
+#                         if request.method == 'POST':
+#                             formset = RowValueInlineFormSet(request.POST, instance=r, prefix = prefix)
+#                             if formset.is_valid():
+#                                 formset.save()
+#                         else:
+#                             formset = RowValueInlineFormSet(instance=r, prefix=prefix)
+#                         
+#                         r.values_formset = formset
         
     
-    active_folder = Folder.objects.get(pk=folder_id) if folder_id else None
+    active_folder = Tag.objects.get(pk=folder_id) if folder_id else None
     
-    return render(request, 'ccenter/page.html', {'page': p, 'sections': section_list, 'folders': Folder.objects.filter(parent=None), 'active_folder': active_folder})
+    return render(request, 'ccenter/page.html', {'page': p, 'sections': section_list, 'folders': Tag.objects.filter(parent=None), 'active_folder': active_folder})
 
 
 

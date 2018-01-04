@@ -1,0 +1,7 @@
+Django==1.11.2
+django-grappelli==2.10.1
+django-markdown==0.8.4
+django-mssql==1.6.2
+django-session-security==2.4.0
+Markdown==2.6.8
+pytz==2017.2
