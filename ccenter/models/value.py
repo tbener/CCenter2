@@ -11,8 +11,8 @@ from ccenter.models.entity import Entity
 
 class Value(models.Model):
     # This model represents the actual field value.
-    # Every Value references to a single Field.
-    field    = models.ForeignKey(Field)
+    # Every Value references a single Field.
+    field               = models.ForeignKey(Field)
     #entity      = models.ForeignKey(Entity, through=Instance)
     instance            = models.ForeignKey(Instance, null=True, blank=True, on_delete=models.CASCADE)
     is_default          = models.BooleanField(default=True)    # shouldn't be presented. in admin=True, otherwise=False

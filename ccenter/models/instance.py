@@ -8,7 +8,6 @@ Created on Dec 19, 2017
 from django.urls import reverse
 from django.db import models
 from ccenter.models.entity import Entity
-from ccenter.models.value import Value
 
 """
 An Instance always belongs to an Entity.
@@ -20,7 +19,7 @@ class Instance(models.Model):
     #value       = models.ForeignKey(Entity, on_delete=models.CASCADE)
     
     def __str__(self):
-        return "%s %d" % (entity.instance_prefix or "Instance", self.id)
+        return "%s %d" % (self.entity.instance_prefix or "Instance", self.id)
     
     class Meta:
         app_label = "ccenter"

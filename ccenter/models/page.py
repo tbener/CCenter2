@@ -12,7 +12,7 @@ from ccenter.models.section import Section
 
 class Page(models.Model):
     title      = models.CharField(max_length=50, help_text="Page title.")
-    tree_name  = models.CharField(max_length=50, help_text="To be used in the tree. Leave empty to use the Title", null=True, blank=True)
+    tree_name  = models.CharField(max_length=50, help_text="To be used in the tree. Leave empty to use the title", null=True, blank=True)
     sub_title   = models.CharField(max_length=100, null=True, blank=True)
     tags      = models.ManyToManyField(Tag)
     sections    = models.ManyToManyField(Section, through='SectionInPage')

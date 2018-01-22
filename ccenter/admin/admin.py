@@ -6,6 +6,7 @@ from ccenter.models.section import Section
 from ccenter.models.entity import Entity
 from ccenter.models.field import Field
 from ccenter.models.value import Value
+from ccenter.models.instance import Instance
 
 
 
@@ -42,7 +43,8 @@ admin.site.register(Page, PageAdmin)
 admin.site.register(Section, SectionAdmin)
 admin.site.register(Entity, EntityAdmin)
 admin.site.register(Field, FieldAdmin)
-
+admin.site.register(Instance, BaseAdmin)
+admin.site.register(Value, BaseAdmin)
 
 
 
